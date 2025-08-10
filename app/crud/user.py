@@ -13,28 +13,28 @@ def get_user_by_email(db: Session, email: str) -> Optional[User]:
 
 def create_user(db: Session, user: schemas.UserCreate) -> User:
     hashed_password = get_password_hash(user.password)
-    db_user = User(
+    user = User(
         username=user.username,
         email=user.email,
         hashed_password=hashed_password,
         tier=user.tier
     )
-    db.add(db_user)
+    db.add(user)
     try:
         db.commit()
-        db.refresh(db_user)
+        db.refresh(user)
     except IntegrityError:
         db.rollback()
         raise
-    return db_user
+    return user
 
 def reset_password(db: Session, email: str, new_password: str) -> Optional[User]:
-    db_user = get_user_by_email(db, email)
-    if db_user:
-        db_user.hashed_password = get_password_hash(new_password)
+    user = get_user_by_email(db, email)
+    if user:
+        user.hashed_password = get_password_hash(new_password)
         db.commit()
-        db.refresh(db_user)
-    return db_user
+        db.refresh(user)
+    return user
 
 def authenticate_user(db: Session, email: str, password: str) -> Optional[User]:
     user = get_user_by_email(db, email=email)

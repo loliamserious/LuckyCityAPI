@@ -58,7 +58,6 @@ def reset_password(
     current_user: dict = Security(get_current_user),
     db: Session = Depends(get_db)
 ):
-    # Only allow users to reset their own password
     if email != current_user["sub"]:
         raise HTTPException(status_code=403, detail="Not authorized to reset this user's password")
     
@@ -76,13 +75,10 @@ async def forgot_password(
 ):
     user = user_crud.get_user_by_email(db, email=request.email)
     if not user:
-        # Don't reveal whether email exists
         return {"message": "If the email exists, a password reset link will be sent"}
     
-    # Create password reset token
     reset_token = create_password_reset_token(request.email)
     
-    # Send email with reset token in background
     background_tasks.add_task(send_password_reset_email, request.email, reset_token)
     
     return {"message": "If the email exists, password reset instructions will be sent"}
@@ -91,11 +87,9 @@ async def forgot_password(
 @router.post("/reset-password-with-token", response_model=Dict[str, str])
 def reset_password_with_token(reset_data: user_schema.PasswordReset, db: Session = Depends(get_db)):
     try:
-        # Verify the reset token
         payload = verify_token(reset_data.token, token_type="reset")
         email = payload["sub"]
         
-        # Reset the password
         user = user_crud.reset_password(db, email, reset_data.new_password)
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
