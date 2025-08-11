@@ -6,6 +6,7 @@ from openai import OpenAI
 
 load_dotenv()
 
+# Initialize OpenAI client with Deepseek's base URL
 client = OpenAI(
     api_key=os.getenv("DEEPSEEK_API_KEY"),
     base_url="https://api.deepseek.com"
@@ -42,7 +43,7 @@ async def get_predictions(birthday: str, country: str) -> Dict:
     - Return only the JSON object, no additional text or explanation
     """
     
-    response = client.chat.completions.create(
+    response = await client.chat.completions.create(
         model="deepseek-chat",
         messages=[
             {"role": "system", "content": "You are an expert in Chinese astrology."},

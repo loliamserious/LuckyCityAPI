@@ -5,8 +5,9 @@ from app.crud import user as user_crud
 from app.database import SessionLocal
 from typing import List, Dict
 from app.security.jwt import create_access_token, get_current_user, create_password_reset_token, verify_token
-from app.email.config import fastmail
+from app.email.config import send_email
 from app.email.templates import get_password_reset_email
+import os
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -16,10 +17,6 @@ def get_db():
         yield db
     finally:
         db.close()
-
-async def send_password_reset_email(email: str, token: str):
-    message = get_password_reset_email(email, token)
-    await fastmail.send_message(message)
 
 @router.post("/", response_model=user_schema.UserResponse)
 def create_user(user: user_schema.UserCreate, db: Session = Depends(get_db)):
@@ -79,7 +76,15 @@ async def forgot_password(
     
     reset_token = create_password_reset_token(request.email)
     
-    background_tasks.add_task(send_password_reset_email, request.email, reset_token)
+    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
+    email_content = get_password_reset_email(request.email, reset_token, frontend_url)
+    
+    background_tasks.add_task(
+        send_email,
+        to_email=request.email,
+        subject=email_content["subject"],
+        body=email_content["body"]
+    )
     
     return {"message": "If the email exists, password reset instructions will be sent"}
 

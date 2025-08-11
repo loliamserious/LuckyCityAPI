@@ -1,19 +1,9 @@
-from fastapi_mail import MessageSchema
-from typing import List
-from pydantic import EmailStr
-import os
-from dotenv import load_dotenv
+from typing import Dict
 
-load_dotenv()
+def get_password_reset_email(email_to: str, token: str, frontend_url: str) -> Dict[str, str]:
 
-# Get the frontend URL from environment variable, default to localhost for development
-FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
-
-def get_password_reset_email(email_to: str, token: str) -> MessageSchema:
-    # Create the reset password URL
-    reset_url = f"{FRONTEND_URL}/reset-password?token={token}"
+    reset_url = f"{frontend_url}/reset-password?token={token}"
     
-    # HTML version for better looking email
     html_body = f"""
     <html>
         <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
@@ -38,9 +28,7 @@ def get_password_reset_email(email_to: str, token: str) -> MessageSchema:
     </html>
     """
 
-    return MessageSchema(
-        subject="Password Reset Request",
-        recipients=[email_to],
-        body=html_body,
-        subtype="html"
-    ) 
+    return {
+        "subject": "Password Reset Request",
+        "body": html_body
+    } 
