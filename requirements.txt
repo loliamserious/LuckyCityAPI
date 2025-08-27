@@ -1,11 +1,11 @@
 fastapi==0.89.1
-uvicorn==0.35.0
+uvicorn==0.22.0
 sqlalchemy==2.0.42
-psycopg2-binary==2.9.10
+psycopg2-binary==2.9.9
 python-jose[cryptography]==3.4.0
 passlib[argon2]==1.7.4
 python-multipart==0.0.8
-python-dotenv==1.0.0
+python-dotenv==0.21.1
 PyJWT==2.8.0
 httpx==0.24.1
 aiosmtplib==2.0.2

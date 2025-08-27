@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, String, Enum
 from app.database import Base
 import enum
 
-class TierEnum(enum.Enum):
+class TierEnum(str, enum.Enum):
     free = "free"
     premium = "premium"
 

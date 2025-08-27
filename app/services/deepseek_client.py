@@ -2,12 +2,12 @@ import os
 import json
 from typing import Dict
 from dotenv import load_dotenv
-from openai import OpenAI
+from openai import AsyncOpenAI
 
 load_dotenv()
 
 # Initialize OpenAI client with Deepseek's base URL
-client = OpenAI(
+client = AsyncOpenAI(
     api_key=os.getenv("DEEPSEEK_API_KEY"),
     base_url="https://api.deepseek.com"
 )
@@ -30,7 +30,9 @@ async def get_predictions(birthday: str, country: str) -> Dict:
             {{
                 "city": "City Name",
                 "rate": 95,
-                "reason": "First reason sentence. Second reason sentence."
+                "reason": "First reason sentence. Second reason sentence.",
+                "latitude": 40.7128,
+                "longitude": -74.0060
             }},
             ... (4 more cities)
         ]
@@ -38,15 +40,16 @@ async def get_predictions(birthday: str, country: str) -> Dict:
 
     Requirements:
     - The "predictions" array must contain exactly 5 cities
-    - Each "rate" must be between 1 and 100 precentage
+    - Each "rate" must be between 1 and 100 percentage
     - Each "reason" must be exactly two sentences
+    - Each city must include accurate latitude and longitude coordinates
     - Return only the JSON object, no additional text or explanation
     """
     
     response = await client.chat.completions.create(
         model="deepseek-chat",
         messages=[
-            {"role": "system", "content": "You are an expert in Chinese astrology."},
+            {"role": "system", "content": "You are an expert in Chinese astrology and geography, with precise knowledge of city locations and coordinates."},
             {"role": "user", "content": prompt}
         ],
         stream=False
